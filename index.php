@@ -1,13 +1,13 @@
-<?php 
+<?php
 define('GOGPHPDL_BASE_DIR', __DIR__);
 /**
-// uncomment and edit.
-// configuration
-define('GOGPHPDL_DOWNLOAD_DIR', '/dl/folder'); // download folder
-define('GOGPHPDL_WGET', 'wget'); // wget executable path
-define('GOGPHPDL_USERNAME', 'user@email.com'); // gog.com user
-define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
-*/
+  // uncomment and edit.
+  // configuration
+  define('GOGPHPDL_DOWNLOAD_DIR', '/dl/folder'); // download folder
+  define('GOGPHPDL_WGET', 'wget'); // wget executable path
+  define('GOGPHPDL_USERNAME', 'user@email.com'); // gog.com user
+  define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
+ */
 ?>
 <html>
     <head>
@@ -22,10 +22,10 @@ define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
          * @author Ketwaroo D. Yaasir
          */
         if(is_file(__DIR__ . '/config.php'))
-			require __DIR__ . '/config.php';
+            require __DIR__ . '/config.php';
 
 
-        if (!empty($_POST['games']))
+        if(!empty($_POST['games']))
         {
             require GOGPHPDL_BASE_DIR . '/lib/GOGPHPDL.php';
             require GOGPHPDL_BASE_DIR . '/lib/OAuth.php';
@@ -35,14 +35,12 @@ define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
             $dl = new GOGPHPDL(GOGPHPDL_USERNAME, GOGPHPDL_PASSWORD);
 
             $dl->setAuthFile(GOGPHPDL_BASE_DIR . '/.gogauth')
-                    ->setDownloadDir(GOGPHPDL_DOWNLOAD_DIR)
-                    ->setWgetBin(GOGPHPDL_WGET)
-                    ->init()
-                    ->revalidateAuth();
+                ->setDownloadDir(GOGPHPDL_DOWNLOAD_DIR)
+                ->setWgetBin(GOGPHPDL_WGET);
 
-            $dlList = array_filter(preg_split('~[\r\n,]~', str_replace(array('gogdownloader://'), '', $_POST['games'])));
+            $dlList = array_filter(preg_split('~[\r\n,]+~', $_POST['games']));
 
-            if (!empty($dlList))
+            if(!empty($dlList))
             {
                 $dl->run($dlList);
             }
@@ -50,11 +48,14 @@ define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
         ?>
 
         <form method="post">
-            <p><textarea name="games" id="games" cols="45" rows="15"></textarea></p>
+            <p>Enter gogdownloader links. one per line. eg.</p>
+            <p><code>gogdownloader://beneath_a_steel_sky/installer_win_en</code></p>
+            <p><textarea name="games" id="games" cols="100" rows="15"></textarea></p>
             <p><button type="submit">Submit</button></p>
         </form>
     </body>
 </html>
+
 
 
 

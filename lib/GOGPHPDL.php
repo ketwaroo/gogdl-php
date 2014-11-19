@@ -1,15 +1,9 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of GOGPHPDL
+ * PHP class to use the gog.com dowloader API.
  * @see https://github.com/lhw/gogdownloader/wiki/API
- * @author K
+ * @author Ketwaroo D. Yaasir
  */
 class GOGPHPDL
 {
@@ -64,16 +58,12 @@ class GOGPHPDL
     {
         $this->curl = curl_init();
 
+        // set defaults.
         $this->setAuthFile(__DIR__ . '/.gogauth')
                 ->setDownloadDir(__DIR__ . '/dl')
                 ->setPassword($password)
                 ->setUsername($username)
                 ->setWgetBin('wget');
-
-        if (!is_dir($this->getDownloadDir()))
-        {
-            mkdir($this->getDownloadDir(), 0777, true);
-        }
     }
 
     /**
@@ -86,7 +76,7 @@ class GOGPHPDL
     }
 
     /**
-     * boot operations
+     * one time boot operations
      * @return \GOGPHPDL
      */
     public function init()
@@ -96,22 +86,35 @@ class GOGPHPDL
             return $this;
         }
 
+        if (!is_dir($this->getDownloadDir()))
+        {
+            mkdir($this->getDownloadDir(), 0777, true);
+        }
+
         $this->fetchApiManifest();
         $this->initDone = true;
         return $this;
     }
 
     /**
-     * 
+     * pass a list of gogdownloader urls as input
+     * should download each files to separate folder in specified download directory.
      * @param string|array $games
      * @return \GOGPHPDL
      */
     public function run($games)
     {
         set_time_limit(0);
+
+        $this->init()
+                ->revalidateAuth();
+
+        // clean list, remove protocol part.
+        $games = str_replace(array('gogdownloader://'), '', (array) $games);
+
         $cmd  = array();
         $wget = $this->getWgetBin();
-        foreach ((array) $games as $game)
+        foreach ($games as $game)
         {
             list($tag, $version) = explode('/', $game);
             $res   = $this->apiGetGameDetails($game);
@@ -172,7 +175,7 @@ class GOGPHPDL
     }
 
     /**
-     * 
+     * executes a gog downloader api call.
      * @param string $url
      * @param array $params
      * @param string $method default GET
@@ -228,7 +231,7 @@ class GOGPHPDL
      * @param string $url
      * @param array $params
      * @param string $httpMethod
-     * @return type
+     * @return array
      */
     public function apiReadAuthed($url, $params = array(), $httpMethod = 'POST')
     {
@@ -237,7 +240,7 @@ class GOGPHPDL
     }
 
     /**
-     * 
+     * signs API params using OAuth
      * @param type $url
      * @param type $params
      * @param string $httpMethod
@@ -245,7 +248,11 @@ class GOGPHPDL
      */
     public function getApiAuthedParams($url, $params = array(), $httpMethod = 'POST')
     {
-        $request         = OAuthRequest::from_consumer_and_token($this->getOAuthConsumer(), $this->getOAuthToken(), $httpMethod, $url, $params);
+        $request         = OAuthRequest::from_consumer_and_token(
+                        $this->getOAuthConsumer()
+                        , $this->getOAuthToken()
+                        , $httpMethod, $url, $params
+        );
         $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
 
         $request->sign_request($signatureMethod, $this->getOAuthConsumer(), $this->getOAuthToken());
@@ -254,8 +261,8 @@ class GOGPHPDL
     }
 
     /**
-     * 
-     * @return type
+     * get user info
+     * @return array
      */
     public function apiGetUserDetails()
     {
@@ -264,8 +271,9 @@ class GOGPHPDL
     }
 
     /**
-     * 
-     * @throws Exception
+     * does not seem to be implemented server side.
+     * or I'm doing it wrong.
+     * @throws \Exception
      */
     public function apiGetGamesList()
     {
@@ -275,9 +283,9 @@ class GOGPHPDL
     }
 
     /**
-     * 
-     * @param type $gameTag
-     * @return type
+     * gets the details of a specific game.
+     * @param string $gameTag
+     * @return array
      */
     public function apiGetGameDetails($gameTag)
     {
@@ -287,8 +295,8 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $gameTag
-     * @return type
+     * @param string $gameTag
+     * @return array
      */
     public function apiGetGameInstaller($gameTag)
     {
@@ -298,8 +306,8 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $gameTag
-     * @return type
+     * @param string $gameTag
+     * @return array
      */
     public function apiGetGameExtras($gameTag)
     {
@@ -309,8 +317,8 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $fileTag
-     * @return type
+     * @param string $fileTag
+     * @return array
      */
     public function apiGetFileDetails($fileTag)
     {
@@ -334,7 +342,7 @@ class GOGPHPDL
     }
 
     /**
-     * performs login operatio
+     * performs login operation
      * @return \GOGPHPDL
      * @throws Exception
      */
@@ -582,7 +590,7 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $downloadDir
+     * @param string $downloadDir
      * @return \GOGPHPDL
      */
     public function setDownloadDir($downloadDir)
@@ -593,7 +601,7 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $wgetBin
+     * @param string $wgetBin
      * @return \GOGPHPDL
      */
     public function setWgetBin($wgetBin)
