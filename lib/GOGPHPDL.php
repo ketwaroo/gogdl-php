@@ -86,7 +86,7 @@ class GOGPHPDL
     }
 
     /**
-     * sets 
+     * boot operations
      * @return \GOGPHPDL
      */
     public function init()
@@ -156,14 +156,15 @@ class GOGPHPDL
     }
 
     /**
-     * 
-     * @param string $cmd
+     * generate temporary dl script.
+     * a bit convoluted but exec() doesn't quite like && to join commands.
+     * @param array $cmd list of commands
      * @return string
      */
     protected function _makeAtCmd($cmd)
     {
         $shfile = sys_get_temp_dir() . '/' . uniqid('gogdl') . '.sh';
-        $cmd    = implode("\n", $cmd) . "\nrm -f {$shfile}";
+        $cmd    = implode("\n", $cmd) . "\nrm -f {$shfile}"; // clean up after itself.
         file_put_contents($shfile, $cmd);
 
         $atcmd = 'at now + 2 minute -f ' . $shfile;
@@ -175,8 +176,8 @@ class GOGPHPDL
      * @param string $url
      * @param array $params
      * @param string $method default GET
-     * @return type
-     * @throws Exception
+     * @return array
+     * @throws \Exception
      */
     public function apiRead($url, $params = array(), $method = 'GET')
     {
@@ -224,24 +225,27 @@ class GOGPHPDL
 
     /**
      * 
-     * @param type $url
-     * @param type $params
+     * @param string $url
+     * @param array $params
+     * @param string $httpMethod
      * @return type
      */
-    public function apiReadAuthed($url, $params = array())
+    public function apiReadAuthed($url, $params = array(), $httpMethod = 'POST')
     {
-
-        $httpMethod = 'POST';
-
         $params = $this->getApiAuthedParams($url, $params, $httpMethod);
-
         return $this->apiRead($url, $params, $httpMethod);
     }
 
+    /**
+     * 
+     * @param type $url
+     * @param type $params
+     * @param string $httpMethod
+     * @return array
+     */
     public function getApiAuthedParams($url, $params = array(), $httpMethod = 'POST')
     {
-        $request = OAuthRequest::from_consumer_and_token($this->getOAuthConsumer(), $this->getOAuthToken(), $httpMethod, $url, $params);
-
+        $request         = OAuthRequest::from_consumer_and_token($this->getOAuthConsumer(), $this->getOAuthToken(), $httpMethod, $url, $params);
         $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
 
         $request->sign_request($signatureMethod, $this->getOAuthConsumer(), $this->getOAuthToken());
