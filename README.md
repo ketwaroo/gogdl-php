@@ -13,9 +13,9 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 
 If you have a linux box which runs as a home server with an outward facing Apache+PHP install accessible via some dynamic DNS (like http://www.noip.com/free) and you have a gog.com account and you're just sitting at work when you get an email about that game you wanted that's 90% off, which you then buy on the spot but think it be nice if you didn't have to wait to go back home to start downloading it and could just set it to download onto your home server to a folder you have shared with the other machines on your network via samba so you could then just install it once you get back.
 
-What you do then is SSH to your home server from work, clone this repository to your `/var/www` folder or whatever your web root is and edit the config a bit to fit your needs. Access the
+What you do then is SSH to your home server from work, clone this repository to your `/var/www` folder or whatever your web root is and edit the config constants a bit in the `index.php` to fit your needs. Access that folder in a web crownser via your home server's public URL, paste the gogdownloader url(s) you want to download in the supplied textbox and submit. The script *should* launch the download as background processes on your home server scheduled to start after a couple of minutes.
 
-There are other commandline gog downloaders out there written in other languages which allow you to use the gog.com downloader API but none of them seem to really 
+This tool is not perfect. There are other commandline gog downloaders out there written in other languages which allow you to use the gog.com downloader API but they did not quite work for me.
 
 # Requirements
 
@@ -57,4 +57,5 @@ $dl->setDownloadDir('/home/user/gog-dl')
 
  * Bonus content doesn't always download correctly
  * Parallelise downloads with AJAX progress updates.
+  * need to tweak launching of download as background process
  * make phar file for direct cli execution
