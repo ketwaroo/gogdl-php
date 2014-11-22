@@ -25,29 +25,29 @@ class GOGPHPDL
     const auth_verifier          = 'oauth_verifier';
 
     protected $username
-            , $password
-            , $authFile
-            , $downloadDir
-            , $wgetBin
-            //, $ApiTimestamp
-            , $apiBaseURL
-            , $apiStatus
-            , $apiConfig
-            , $apiVersion
-            , $initDone       = false
+        , $password
+        , $authFile
+        , $downloadDir
+        , $wgetBin
+        //, $ApiTimestamp
+        , $apiBaseURL
+        , $apiStatus
+        , $apiConfig
+        , $apiVersion
+        , $initDone       = false
     ;
     private $curl
-            // , $apiCache         = array()
-            , $lastApiRead      = array()
-            , $authData
-            , $OAuthToken
-            , $OAuthConsumer
-            , $authDataDefaults = array(
-                self::auth_token        => NULL,
-                self::auth_token_secret => NULL,
-                self::auth_verifier     => NULL,
-                    )
-            , $log              = array();
+        // , $apiCache         = array()
+        , $lastApiRead      = array()
+        , $authData
+        , $OAuthToken
+        , $OAuthConsumer
+        , $authDataDefaults = array(
+            self::auth_token        => NULL,
+            self::auth_token_secret => NULL,
+            self::auth_verifier     => NULL,
+            )
+        , $log              = array();
 
     /**
      * 
@@ -60,10 +60,10 @@ class GOGPHPDL
 
         // set defaults.
         $this->setAuthFile(__DIR__ . '/.gogauth')
-                ->setDownloadDir(__DIR__ . '/dl')
-                ->setPassword($password)
-                ->setUsername($username)
-                ->setWgetBin('wget');
+            ->setDownloadDir(__DIR__ . '/dl')
+            ->setPassword($password)
+            ->setUsername($username)
+            ->setWgetBin('wget');
     }
 
     /**
@@ -81,12 +81,12 @@ class GOGPHPDL
      */
     public function init()
     {
-        if ($this->initDone)
+        if($this->initDone)
         {
             return $this;
         }
 
-        if (!is_dir($this->getDownloadDir()))
+        if(!is_dir($this->getDownloadDir()))
         {
             mkdir($this->getDownloadDir(), 0777, true);
         }
@@ -107,30 +107,30 @@ class GOGPHPDL
         set_time_limit(0);
 
         $this->init()
-                ->revalidateAuth();
+            ->revalidateAuth();
 
         // clean list, remove protocol part.
         $games = str_replace(array('gogdownloader://'), '', (array) $games);
 
         $cmd  = array();
         $wget = $this->getWgetBin();
-        foreach ($games as $game)
+        foreach($games as $game)
         {
             list($tag, $version) = explode('/', $game);
             $res   = $this->apiGetGameDetails($game);
             $parts = $res['game'][$version];
 
-            if (!array_key_exists(0, $parts)) // for updates and the like
+            if(!array_key_exists(0, $parts)) // for updates and the like
             {
                 $parts = array($parts);
             }
 
-            foreach ($parts as $part)
+            foreach($parts as $part)
             {
                 $file    = $this->apiGetFileDetails($tag . '/' . $part['id']);
                 $outfile = GOGPHPDL_DOWNLOAD_DIR . '/' . $tag . '/' . basename($part['link']);
 
-                if (!is_dir(dirname($outfile)))
+                if(!is_dir(dirname($outfile)))
                 {
                     mkdir(dirname($outfile), 0777, true);
                 }
@@ -142,11 +142,13 @@ class GOGPHPDL
             }
         }
 
-        if (DIRECTORY_SEPARATOR === '/')
+        if(DIRECTORY_SEPARATOR === '/')
         { // linux
-            $cmd = $this->_makeAtCmd($cmd);
-            exec($cmd, $out);
-            $this->log($out);
+            $cmd = $this->_makeLinuxCmd($cmd);
+            exec($cmd, $out, $rc);
+            $this->log($cmd)
+                ->log($out)
+                ->log('returned ' . $rc);
         }
         else
         { // windows untested
@@ -164,13 +166,14 @@ class GOGPHPDL
      * @param array $cmd list of commands
      * @return string
      */
-    protected function _makeAtCmd($cmd)
+    protected function _makeLinuxCmd($cmd)
     {
         $shfile = sys_get_temp_dir() . '/' . uniqid('gogdl') . '.sh';
-        $cmd    = implode("\n", $cmd) . "\nrm -f {$shfile}"; // clean up after itself.
+        $cmd    = "nice ".implode("\nnice ", $cmd) . "\nrm -f {$shfile}"; // clean up after itself.
         file_put_contents($shfile, $cmd);
-
-        $atcmd = 'at now + 2 minute -f ' . $shfile;
+        chmod($shfile, 0755);
+        $atcmd  = $shfile .' > /dev/null 2>/dev/null &';
+        //$atcmd  = 'at now + 1 minute -f ' . $shfile;
         return $atcmd;
     }
 
@@ -190,7 +193,7 @@ class GOGPHPDL
         curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($this->curl, CURLOPT_TIMEOUT, 10);
 
-        switch ($method)
+        switch($method)
         {
             case 'POST':
                 curl_setopt($this->curl, CURLOPT_URL, $url);
@@ -207,12 +210,12 @@ class GOGPHPDL
         $last_error        = curl_error($this->curl);
         $result            = json_decode($res, true);
 
-        if (is_null($result))// sometimes strings are returned
+        if(is_null($result))// sometimes strings are returned
         {
             $result = $res;
         }
 
-        if (!empty($last_error) || $this->lastApiRead['http_code'] !== 200)
+        if(!empty($last_error) || $this->lastApiRead['http_code'] !== 200)
         {
 
             $this->log($url, $params, $last_error, $result, $this->lastApiRead);
@@ -249,9 +252,9 @@ class GOGPHPDL
     public function getApiAuthedParams($url, $params = array(), $httpMethod = 'POST')
     {
         $request         = OAuthRequest::from_consumer_and_token(
-                        $this->getOAuthConsumer()
-                        , $this->getOAuthToken()
-                        , $httpMethod, $url, $params
+                $this->getOAuthConsumer()
+                , $this->getOAuthToken()
+                , $httpMethod, $url, $params
         );
         $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
 
@@ -334,8 +337,8 @@ class GOGPHPDL
         $test = $this->apiRead(self::gogdl_api_manifest);
 
         $this->setApiConfig($test['config'])
-                ->setApiStatus($test['status'])
-                ->setApiVersion($test['current_version']);
+            ->setApiStatus($test['status'])
+            ->setApiVersion($test['current_version']);
         $this->apiBaseURL = dirname($test['config'][self::url_get_user_details]);
         $this->getAuthData();
         return $this;
@@ -375,7 +378,7 @@ class GOGPHPDL
         // test
         $isValid = $this->isAuthDataValid();
 
-        if ($isValid)
+        if($isValid)
         {
             $this->saveAuthdata();
         }
@@ -395,7 +398,7 @@ class GOGPHPDL
         //oauth_get_temp_token, oauth_authorize_temp_token, oauth_get_token
         $valid = $this->isAuthDataValid();
 
-        if (!$valid)
+        if(!$valid)
         {
             $this->login();
         }
@@ -412,18 +415,18 @@ class GOGPHPDL
     public function isAuthDataValid()
     {
         $authData = $this->getAuthData();
-        if (!empty($authData[self::auth_token]) && !empty($authData[self::auth_token_secret]) && !empty($authData[self::auth_verifier]))
+        if(!empty($authData[self::auth_token]) && !empty($authData[self::auth_token_secret]) && !empty($authData[self::auth_verifier]))
         {
             $cfg = $this->getApiConfig();
             try
             {
                 $test = $this->apiReadAuthed($cfg[self::url_get_user_details]);
-                if ($test['result'] === 'ok')
+                if($test['result'] === 'ok')
                 {
                     return true;
                 }
             }
-            catch (Exception $exc)
+            catch(Exception $exc)
             {
                 //echo $exc->getMessage();
                 return false;
@@ -439,7 +442,7 @@ class GOGPHPDL
      */
     protected function getOAuthConsumer()
     {
-        if (empty($this->OAuthConsumer))
+        if(empty($this->OAuthConsumer))
         {
             $this->OAuthConsumer = new OAuthConsumer(self::gog_consumer_key, self::gog_consumer_sercret);
         }
@@ -465,10 +468,10 @@ class GOGPHPDL
      */
     protected function getOAuthToken()
     {
-        if (is_null($this->OAuthToken))
+        if(is_null($this->OAuthToken))
         {
             $authData = $this->getAuthData();
-            if (!empty($authData[self::auth_token]) && !empty($authData[self::auth_token_secret]))
+            if(!empty($authData[self::auth_token]) && !empty($authData[self::auth_token_secret]))
             {
                 $this->setOAuthToken($authData[self::auth_token], $authData[self::auth_token_secret]);
             }
@@ -482,7 +485,7 @@ class GOGPHPDL
      */
     protected function getAuthData()
     {
-        if (empty($this->authData))
+        if(empty($this->authData))
         {
             $this->authData = unserialize(file_get_contents($this->getAuthFile()));
         }
@@ -689,12 +692,12 @@ class GOGPHPDL
      */
     private function _parseopt($param, $defaults, $strict = true)
     {
-        if (empty($param))
+        if(empty($param))
         {
             return $defaults;
         }
 
-        if (is_string($param))
+        if(is_string($param))
         {
             $tmp   = array();
             parse_str($param, $tmp);
@@ -703,7 +706,7 @@ class GOGPHPDL
 
         $param = array_merge($defaults, (array) $param);
 
-        if ($strict)
+        if($strict)
         {
             return array_intersect_key((array) $param, $defaults);
         }
@@ -719,7 +722,7 @@ class GOGPHPDL
     public function log()
     {
         $msg = func_get_args();
-        if (!empty($msg))
+        if(!empty($msg))
         {
             $this->log[] = $msg;
             return $this;

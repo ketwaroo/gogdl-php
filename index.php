@@ -1,8 +1,8 @@
 <?php
-define('GOGPHPDL_BASE_DIR', __DIR__);
 /**
   // uncomment and edit.
   // configuration
+  define('GOGPHPDL_BASE_DIR', __DIR__);
   define('GOGPHPDL_DOWNLOAD_DIR', '/dl/folder'); // download folder
   define('GOGPHPDL_WGET', 'wget'); // wget executable path
   define('GOGPHPDL_USERNAME', 'user@email.com'); // gog.com user
@@ -22,7 +22,9 @@ define('GOGPHPDL_BASE_DIR', __DIR__);
          * @author Ketwaroo D. Yaasir
          */
         if(is_file(__DIR__ . '/config.php'))
+        {
             require __DIR__ . '/config.php';
+        }
 
 
         if(!empty($_POST['games']))
@@ -53,6 +55,15 @@ define('GOGPHPDL_BASE_DIR', __DIR__);
             <p><textarea name="games" id="games" cols="100" rows="15"></textarea></p>
             <p><button type="submit">Submit</button></p>
         </form>
+
+        <?php
+        $log = $dl->log();
+
+        if(!empty($log))
+        {
+            echo '<pre>', print_r($log, 1), '</pre>';
+        }
+        ?>
     </body>
 </html>
 
