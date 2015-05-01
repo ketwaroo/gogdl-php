@@ -1,17 +1,38 @@
 <?php
-/**
-  // uncomment and edit.
-  // configuration
-  define('GOGPHPDL_BASE_DIR', __DIR__);
-  define('GOGPHPDL_DOWNLOAD_DIR', '/dl/folder'); // download folder
-  define('GOGPHPDL_WGET', 'wget'); // wget executable path
-  define('GOGPHPDL_USERNAME', 'user@email.com'); // gog.com user
-  define('GOGPHPDL_PASSWORD', 'abc123'); // gog.com password
- */
+if(!is_file(__DIR__ . '/config.php'))
+{
+    throw new Exception('configuration not found.');
+}
+require __DIR__ . '/config.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
 ?>
+<!doctype html>
 <html>
     <head>
         <title>Enter game list</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" />
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.2/handlebars.min.js"></script>
+        <script type="text/javascript">
+            var progressInterval;
+            $(document).ready(function () {
+
+                var tpl = Handlebars.compile($('#progressTemplate').html());
+
+                progressInterval = setInterval(function () {
+                    $.get('./progress.php', function (data) {
+                        $("#out").html(tpl({"data": data}));
+                    });
+                }
+                , 2000);
+
+            });
+        </script>
+
     </head>
     <body>
         <?php
@@ -21,30 +42,27 @@
          * 
          * @author Ketwaroo D. Yaasir
          */
-        if(is_file(__DIR__ . '/config.php'))
-        {
-            require __DIR__ . '/config.php';
-        }
+        $dl = new \Gogdl\Downloader(GOGPHPDL_USERNAME, GOGPHPDL_PASSWORD);
 
+        $dl->setAuthFile(GOGPHPDL_BASE_DIR . '/.gogauth')
+            ->setDownloadDir(GOGPHPDL_DOWNLOAD_DIR)
+            ->setWgetBin(GOGPHPDL_WGET);
+
+        $progress = new \Gogdl\ProgressServer();
+
+        $progress->setProgressChacheDir(GOGPHPDL_DOWNLOAD_DIR);
 
         if(!empty($_POST['games']))
         {
-            require GOGPHPDL_BASE_DIR . '/lib/GOGPHPDL.php';
-            require GOGPHPDL_BASE_DIR . '/lib/OAuth.php';
 
             ob_end_clean();
-
-            $dl = new GOGPHPDL(GOGPHPDL_USERNAME, GOGPHPDL_PASSWORD);
-
-            $dl->setAuthFile(GOGPHPDL_BASE_DIR . '/.gogauth')
-                ->setDownloadDir(GOGPHPDL_DOWNLOAD_DIR)
-                ->setWgetBin(GOGPHPDL_WGET);
 
             $dlList = array_filter(preg_split('~[\r\n,]+~', $_POST['games']));
 
             if(!empty($dlList))
             {
-                $dl->run($dlList);
+                // run through decorator
+                $progress->runDownloader($dl, $dlList);
             }
         }
         ?>
@@ -53,8 +71,25 @@
             <p>Enter gogdownloader links. one per line. eg.</p>
             <p><code>gogdownloader://beneath_a_steel_sky/installer_win_en</code></p>
             <p><textarea name="games" id="games" cols="100" rows="15"></textarea></p>
-            <p><button type="submit">Submit</button></p>
+            <p><button type="submit" class="btn btn-default">Submit</button></p>
         </form>
+
+        <div id="out"></div>
+
+        <div id="progressTemplate" class="hide">
+
+            <div class="row">
+                {{#each data}}
+                <h4 class="col-xs-12">{{game}}</h4>
+                {{#each this.files}}
+                <div class="game-progress col-xs-6">{{file}}</div>
+                <div class="completed col-xs-2">{{currentSize}}</div>
+                <div class="completed col-xs-2">{{expectedSize}}</div>
+                <div class="completed col-xs-2">{{progress}}%</div>
+                {{/each}}
+                {{/each}}
+            </div>
+        </div>
 
         <?php
         $log = $dl->log();
@@ -64,6 +99,7 @@
             echo '<pre>', print_r($log, 1), '</pre>';
         }
         ?>
+
     </body>
 </html>
 
