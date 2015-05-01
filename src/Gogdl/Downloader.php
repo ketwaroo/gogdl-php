@@ -42,7 +42,7 @@ class Downloader
     private $curl
         // , $apiCache         = array()
         , $lastApiRead      = array()
-        , $authData
+        , $authData         = array()
         , $OAuthToken
         , $OAuthConsumer
         , $authDataDefaults = array(
@@ -141,8 +141,8 @@ class Downloader
 
                 $continue = is_file($outfile) ? ' --continue ' : ' ';
 
-                $headers                      = get_headers($file['file']['link'], 1);
-                
+                $headers = get_headers($file['file']['link'], 1);
+
                 $this->files[$game][$outfile] = array(
                     'filesize'  => $headers['Content-Length'],
                     'filemtime' => strtotime($headers['Last-Modified']),
@@ -499,7 +499,11 @@ class Downloader
     {
         if(empty($this->authData))
         {
-            $this->authData = unserialize(file_get_contents($this->getAuthFile()));
+            $authFile = $this->getAuthFile();
+            if(is_file($authFile))
+            {
+                $this->authData = unserialize(file_get_contents($authFile));
+            }
         }
         return $this->_parseopt($this->authData, $this->authDataDefaults);
     }
