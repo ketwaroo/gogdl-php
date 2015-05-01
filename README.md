@@ -33,7 +33,7 @@ This tool is not perfect. There are other commandline gog downloaders out there 
 <?php 
 
 /*
- * The instance of the GOGPHPDL class is created with login credentials
+ * The instance of the \GogDl\Downloader class is created with login credentials
  * 
  * 
  * A gogdownloader url looks something like this.
@@ -43,7 +43,7 @@ This tool is not perfect. There are other commandline gog downloaders out there 
  * to the folder `/home/user/gog-dl`
  */
 
-$dl = new GOGPHPDL('user@mail.org', 'abc123');
+$dl = new \GogDl\Downloader('user@mail.org', 'abc123');
 
 $dl->setDownloadDir('/home/user/gog-dl')
     ->run(array(
@@ -56,6 +56,6 @@ $dl->setDownloadDir('/home/user/gog-dl')
 # To do/fix
 
  * Bonus content doesn't always download correctly
- * Parallelise downloads with AJAX progress updates.
+ * ~Parallelise downloads with AJAX progress updates.~
   * need to tweak launching of download as background process
  * make phar file for direct cli execution
