@@ -1,0 +1,26 @@
+{
+    "name": "ketwaroo/gogdl",
+    "description": "PHP classes to use the gog.com dowloader API.",
+    "license": "MIT",
+    "authore": [
+        {
+            "name": "Yaasir Ketwaroo",
+            "email": "ketwaroo.yaasir@gmail.com",
+            "homepage": "https://github.com/ketwaroo",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Gogdl\\": "src/"
+        },
+        "classmap": [
+            "lib/OAuth.php"
+        ]
+    },
+    "keywords": [
+        "gog.com",
+        "downloader",
+        "Good Old Games"
+    ]
+}
