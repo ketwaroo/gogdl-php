@@ -1,11 +1,13 @@
 <?php
 
+namespace Gogdl;
+
 /**
  * PHP class to use the gog.com dowloader API.
  * @see https://github.com/lhw/gogdownloader/wiki/API
  * @author Ketwaroo D. Yaasir
  */
-class GOGPHPDL
+class Downloader
 {
 
     const gog_consumer_key       = "1f444d14ea8ec776585524a33f6ecc1c413ed4a5";
@@ -35,6 +37,7 @@ class GOGPHPDL
         , $apiConfig
         , $apiVersion
         , $initDone       = false
+        , $files          = []
     ;
     private $curl
         // , $apiCache         = array()
@@ -77,7 +80,7 @@ class GOGPHPDL
 
     /**
      * one time boot operations
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function init()
     {
@@ -100,7 +103,7 @@ class GOGPHPDL
      * pass a list of gogdownloader urls as input
      * should download each files to separate folder in specified download directory.
      * @param string|array $games
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function run($games)
     {
@@ -117,7 +120,8 @@ class GOGPHPDL
         foreach($games as $game)
         {
             list($tag, $version) = explode('/', $game);
-            $res   = $this->apiGetGameDetails($game);
+            $res = $this->apiGetGameDetails($game);
+
             $parts = $res['game'][$version];
 
             if(!array_key_exists(0, $parts)) // for updates and the like
@@ -136,6 +140,14 @@ class GOGPHPDL
                 }
 
                 $continue = is_file($outfile) ? ' --continue ' : ' ';
+
+                $headers                      = get_headers($file['file']['link'], 1);
+                
+                $this->files[$game][$outfile] = array(
+                    'filesize'  => $headers['Content-Length'],
+                    'filemtime' => strtotime($headers['Last-Modified']),
+                );
+
 
                 // $cmd[] = $wget . ' -O ' . $outfile . ' -P ' . dirname($outfile) . $continue . $file['file']['link'];
                 $cmd[] = $wget . ' -O ' . escapeshellarg($outfile) . $continue . escapeshellarg($file['file']['link']);
@@ -169,10 +181,10 @@ class GOGPHPDL
     protected function _makeLinuxCmd($cmd)
     {
         $shfile = sys_get_temp_dir() . '/' . uniqid('gogdl') . '.sh';
-        $cmd    = "nice ".implode("\nnice ", $cmd) . "\nrm -f {$shfile}"; // clean up after itself.
+        $cmd    = "nice " . implode("\nnice ", $cmd) . "\nrm -f {$shfile}"; // clean up after itself.
         file_put_contents($shfile, $cmd);
         chmod($shfile, 0755);
-        $atcmd  = $shfile .' > /dev/null 2>/dev/null &';
+        $atcmd  = $shfile . ' > /dev/null 2>/dev/null &';
         //$atcmd  = 'at now + 1 minute -f ' . $shfile;
         return $atcmd;
     }
@@ -251,12 +263,12 @@ class GOGPHPDL
      */
     public function getApiAuthedParams($url, $params = array(), $httpMethod = 'POST')
     {
-        $request         = OAuthRequest::from_consumer_and_token(
+        $request         = \OAuthRequest::from_consumer_and_token(
                 $this->getOAuthConsumer()
                 , $this->getOAuthToken()
                 , $httpMethod, $url, $params
         );
-        $signatureMethod = new OAuthSignatureMethod_HMAC_SHA1();
+        $signatureMethod = new \OAuthSignatureMethod_HMAC_SHA1();
 
         $request->sign_request($signatureMethod, $this->getOAuthConsumer(), $this->getOAuthToken());
 
@@ -330,7 +342,7 @@ class GOGPHPDL
 
     /**
      * fetch details about API
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     protected function fetchApiManifest()
     {
@@ -346,7 +358,7 @@ class GOGPHPDL
 
     /**
      * performs login operation
-     * @return \GOGPHPDL
+     * @return Downloader
      * @throws Exception
      */
     public function login()
@@ -391,7 +403,7 @@ class GOGPHPDL
 
     /**
      * revalidate auth if expired.
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function revalidateAuth()
     {
@@ -438,13 +450,13 @@ class GOGPHPDL
 
     /**
      * 
-     * @return OAuthConsumer
+     * @return \OAuthConsumer
      */
     protected function getOAuthConsumer()
     {
         if(empty($this->OAuthConsumer))
         {
-            $this->OAuthConsumer = new OAuthConsumer(self::gog_consumer_key, self::gog_consumer_sercret);
+            $this->OAuthConsumer = new \OAuthConsumer(self::gog_consumer_key, self::gog_consumer_sercret);
         }
 
         return $this->OAuthConsumer;
@@ -454,17 +466,17 @@ class GOGPHPDL
      * 
      * @param type $key
      * @param type $secret
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     protected function setOAuthToken($key, $secret)
     {
-        $this->OAuthToken = new OAuthToken($key, $secret);
+        $this->OAuthToken = new \OAuthToken($key, $secret);
         return $this;
     }
 
     /**
      * 
-     * @return OAuthToken
+     * @return \OAuthToken
      */
     protected function getOAuthToken()
     {
@@ -505,7 +517,7 @@ class GOGPHPDL
 
     /**
      * 
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function saveAuthdata()
     {
@@ -561,7 +573,7 @@ class GOGPHPDL
     /**
      * 
      * @param type $username
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setUsername($username)
     {
@@ -572,7 +584,7 @@ class GOGPHPDL
     /**
      * 
      * @param type $password
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setPassword($password)
     {
@@ -583,7 +595,7 @@ class GOGPHPDL
     /**
      * 
      * @param type $authFile
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setAuthFile($authFile)
     {
@@ -594,7 +606,7 @@ class GOGPHPDL
     /**
      * 
      * @param string $downloadDir
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setDownloadDir($downloadDir)
     {
@@ -605,7 +617,7 @@ class GOGPHPDL
     /**
      * 
      * @param string $wgetBin
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setWgetBin($wgetBin)
     {
@@ -625,7 +637,7 @@ class GOGPHPDL
     /**
      * 
      * @param type $ApiStatus
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     protected function setApiStatus($ApiStatus)
     {
@@ -645,7 +657,7 @@ class GOGPHPDL
     /**
      * 
      * @param array $ApiConfig
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setApiConfig($ApiConfig)
     {
@@ -663,9 +675,18 @@ class GOGPHPDL
     }
 
     /**
+     * return file data collected from API
+     * @return array
+     */
+    public function getFiles()
+    {
+        return $this->files;
+    }
+
+    /**
      * 
      * @param string $ApiVersion
-     * @return \GOGPHPDL
+     * @return Downloader
      */
     public function setApiVersion($ApiVersion)
     {
@@ -717,7 +738,7 @@ class GOGPHPDL
     /**
      * log msg
      * @param string|null $msg
-     * @return \GOGPHPDL|array
+     * @return Downloader|array
      */
     public function log()
     {

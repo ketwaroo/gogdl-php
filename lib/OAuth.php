@@ -1,6 +1,8 @@
 <?php
 // vim: foldmethod=marker
-
+/**
+ * https://code.google.com/p/oauth-php/
+ */
 /* Generic exception class
  */
 class OAuthException extends Exception {
