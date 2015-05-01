@@ -82,7 +82,7 @@ class ProgressServer extends AbstractDownloaderDecorator
         {
             foreach($files as $file => $meta)
             {
-                $current                                         = filesize($file);
+                $current                                         = is_file($file) ? filesize($file) : 0;
                 $this->progressData[$game][$file]['currentSize'] = $current;
             }
         }
