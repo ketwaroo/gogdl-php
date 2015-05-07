@@ -54,9 +54,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
         if(!empty($_POST['games']))
         {
-
-            ob_end_clean();
-
             $dlList = array_filter(preg_split('~[\r\n,]+~', $_POST['games']));
 
             if(!empty($dlList))
