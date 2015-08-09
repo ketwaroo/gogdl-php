@@ -201,6 +201,7 @@ class Downloader
     {
         //curl_reset($this->curl); // php 5.5 aparently
 
+        curl_setopt($this->curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
         curl_setopt($this->curl, CURLOPT_BINARYTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
