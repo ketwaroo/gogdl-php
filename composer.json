@@ -2,7 +2,7 @@
     "name": "ketwaroo/gogdl",
     "description": "PHP classes to use the gog.com dowloader API.",
     "license": "MIT",
-    "authore": [
+    "author": [
         {
             "name": "Yaasir Ketwaroo",
             "email": "ketwaroo.yaasir@gmail.com",
