@@ -232,14 +232,8 @@ class Downloader
         {
 
             $this->log($url, $params, $last_error, $result, $this->lastApiRead);
-            throw new \Exception('Error' . $last_error . '\n'
-            . '<pre><h3>Result</h3>\n' . print_r($result, 1) . '</pre>'
-            . '<pre><h3>LastApiRead</h3>\n' . print_r($this->lastApiRead, 1) . '</pre>'
-            . '<pre><h3>Params</h3>\n' . print_r($params, 1) . '</pre>'
-            );
+            throw new \Exception("Error: {$last_error}");
         }
-        
-        
 
         return $result;
     }
