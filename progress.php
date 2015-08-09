@@ -35,7 +35,7 @@ foreach($data as $game => $files)
             'file'         => $file,
             'expectedSize' => $meta['expectedSize'],
             'currentSize'  => $meta['currentSize'],
-            'progress'     => round(100 * ($meta['currentSize'] / $meta['expectedSize']), 2),
+            'progress'     => @round(100 * ($meta['currentSize'] / $meta['expectedSize']), 2),
         );
     }
 
