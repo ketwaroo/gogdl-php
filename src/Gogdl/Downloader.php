@@ -201,6 +201,7 @@ class Downloader
     {
         //curl_reset($this->curl); // php 5.5 aparently
 
+        curl_setopt($this->curl, CURLOPT_BINARYTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($this->curl, CURLOPT_TIMEOUT, 10);
@@ -237,6 +238,8 @@ class Downloader
             . '<pre><h3>Params</h3>\n' . print_r($params, 1) . '</pre>'
             );
         }
+        
+        
 
         return $result;
     }
