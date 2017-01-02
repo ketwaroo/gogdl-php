@@ -1,11 +1,10 @@
 <?php
-if(!is_file(__DIR__ . '/config.php'))
+if (!is_file(__DIR__ . '/config.php'))
 {
     throw new Exception('configuration not found.');
 }
 require __DIR__ . '/config.php';
 require_once __DIR__ . '/vendor/autoload.php';
-
 ?>
 <!doctype html>
 <html>
@@ -52,15 +51,39 @@ require_once __DIR__ . '/vendor/autoload.php';
 
         $progress->setProgressChacheDir(GOGPHPDL_DOWNLOAD_DIR);
 
-        if(!empty($_POST['games']))
+        if (!empty($_POST['games']))
         {
             $dlList = array_filter(preg_split('~[\r\n,]+~', $_POST['games']));
 
-            if(!empty($dlList))
+            if (!empty($dlList))
             {
                 // run through decorator
                 $progress->runDownloader($dl, $dlList);
             }
+        }
+
+        if (!empty($_POST['gamelist']))
+        {
+
+
+           $user= ($dl->init()->apiGetUserDetails());
+           p($user);
+           try
+           {
+               //p($dl->init()->apiGetGamesList($user['user']['id'])); 
+               p($dl->init()->apiGetGamesList($user['user']['xywka'])); 
+               p($dl->init()->apiGetGamesList($user['user']['email'])); 
+               p($dl->init()->apiGetGamesList($user['user']['hash'])); 
+           }
+           catch (\Exception $exc)
+           {
+               p($exc);
+           }
+
+          
+           
+           die;
+    
         }
         ?>
 
@@ -70,7 +93,10 @@ require_once __DIR__ . '/vendor/autoload.php';
             <p><textarea name="games" id="games" cols="100" rows="15"></textarea></p>
             <p><button type="submit" class="btn btn-default">Submit</button></p>
         </form>
-
+        <form method="post">
+            <input type="hidden"  name="gamelist" value="1"/>
+            <button type="submit" class="btn btn-default">Game list</button>
+        </form>
         <div id="out"></div>
 
         <div id="progressTemplate" class="hide">
@@ -91,7 +117,7 @@ require_once __DIR__ . '/vendor/autoload.php';
         <?php
         $log = $dl->log();
 
-        if(!empty($log))
+        if (!empty($log))
         {
             echo '<pre>', print_r($log, 1), '</pre>';
         }

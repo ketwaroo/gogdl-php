@@ -209,6 +209,12 @@ class Downloader
 
         switch($method)
         {
+            case 'OPTIONS':
+                curl_setopt($this->curl, CURLOPT_URL, $url);
+                curl_setopt($this->curl, CURLOPT_, true);
+ 
+
+                break;
             case 'POST':
                 curl_setopt($this->curl, CURLOPT_URL, $url);
                 curl_setopt($this->curl, CURLOPT_POST, true);
@@ -288,11 +294,11 @@ class Downloader
      * or I'm doing it wrong.
      * @throws \Exception
      */
-    public function apiGetGamesList()
+    public function apiGetGamesList($userId)
     {
-        throw new Exception('NOT IMPLEMENTED');
-//        $cfg = $this->getApiConfig();
-//        return $this->apiReadAuthed($cfg[self::url_get_user_games]);
+        
+        $cfg = $this->getApiConfig();
+        return $this->apiReadAuthed($cfg[self::url_get_user_games].'/'.$userId.'/');
     }
 
     /**
