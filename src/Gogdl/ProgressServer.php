@@ -11,7 +11,7 @@ namespace Gogdl;
 /**
  * Description of ProgressServer
  *
- * @author Yaasir Ketwaroo<yaasir@ketwaroo.com>
+ * @author Yaasir Ketwaroo
  */
 class ProgressServer extends AbstractDownloaderDecorator
 {
