@@ -11,7 +11,7 @@ namespace Gogdl;
 /**
  * Description of AbstractDownloaderDecorator
  *
- * @author Yaasir Ketwaroo<yaasir@ketwaroo.com>
+ * @author Yaasir Ketwaroo
  */
 abstract class AbstractDownloaderDecorator
 {
